@@ -1,0 +1,15 @@
+{
+  "name": "sattpv-api-docs",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Official documentation for the SatTPV API",
+  "scripts": {
+    "docs:dev": "vitepress dev docs",
+    "docs:build": "vitepress build docs",
+    "docs:preview": "vitepress preview docs"
+  },
+  "devDependencies": {
+    "vitepress": "^1.6.3"
+  }
+}
