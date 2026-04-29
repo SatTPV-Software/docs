@@ -4,6 +4,7 @@ export default defineConfig({
   lang: 'en-US',
   title: 'SatTPV API',
   description: 'Official documentation for the SatTPV REST API',
+  base: '/docs/',
   cleanUrls: true,
   lastUpdated: true,
 
