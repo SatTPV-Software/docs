@@ -1,3 +1,8 @@
+---
+title: Products
+description: Overview of the SatTPV Products module — endpoints, product object schema, stock, pricing and related collections (serials, defectives, units log, multishop stock).
+---
+
 # Products
 
 The **Products** module lets you manage the catalog of items you sell or repair in your SatTPV account — physical goods, accessories, parts and SAT/service items.

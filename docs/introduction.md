@@ -1,3 +1,8 @@
+---
+title: Introduction
+description: Introduction to the SatTPV REST API — base URL, response envelope and how to start integrating with the SatTPV platform.
+---
+
 # Introduction
 
 Welcome to the official documentation of the **SatTPV API**. The API lets you integrate your own applications, scripts or third-party tools with the [SatTPV](https://www.sattpv.net) platform — manage customers, repairs, sales, inventory and the rest of the resources available in your account.

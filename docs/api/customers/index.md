@@ -1,3 +1,8 @@
+---
+title: Customers
+description: Overview of the SatTPV Customers module — endpoints, customer object schema and related collections (repairs, sales, services, docs, credit history).
+---
+
 # Customers
 
 The **Customers** module lets you manage the contacts associated with your SatTPV account — the people and companies that own the repairs, sales and services you track.

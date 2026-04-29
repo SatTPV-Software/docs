@@ -1,0 +1,512 @@
+openapi: 3.1.0
+info:
+  title: SatTPV API
+  version: '3.0'
+  description: |
+    Official REST API for the [SatTPV](https://www.sattpv.net) point-of-sale and
+    repair-shop management platform. Authentication is performed via Bearer tokens
+    obtained from `POST /auth/login`. See the full documentation at
+    https://www.sattpv.net/docs/.
+  contact:
+    name: SatTPV
+    url: https://www.sattpv.net
+servers:
+  - url: https://api-v3.sattpv.net
+    description: Production
+security:
+  - bearerAuth: []
+tags:
+  - name: Authentication
+    description: Obtain and refresh Bearer tokens.
+  - name: Customers
+    description: Manage customers and their related data (repairs, sales, services, docs, credit history).
+  - name: Products
+    description: Manage the product catalog, stock, pricing and per-shop inventory.
+paths:
+  /auth/login:
+    post:
+      tags: [Authentication]
+      summary: Login
+      description: Exchange a username and password for a Bearer token. Tokens are valid for at least 8 hours.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [username, pass]
+              properties:
+                username:
+                  type: string
+                  description: SatTPV account username or email.
+                pass:
+                  type: string
+                  format: password
+                  description: Account password.
+      responses:
+        '200':
+          description: Authenticated.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelope'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          token:
+                            type: string
+                            description: Raw token (without the `Bearer ` prefix).
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /customers:
+    get:
+      tags: [Customers]
+      summary: List customers
+      description: Retrieve a paginated list of customers. All filters are optional.
+      parameters:
+        - { in: query, name: customer_name,  schema: { type: string },  description: Filter by full name (partial match). }
+        - { in: query, name: customer_phone, schema: { type: string },  description: Filter by phone number (partial match). }
+        - { in: query, name: customer_nif,   schema: { type: string },  description: Filter by tax ID (partial match). }
+        - { in: query, name: customer_from,  schema: { type: integer }, description: Lower bound for created_at (Unix timestamp). }
+        - { in: query, name: customer_to,    schema: { type: integer }, description: Upper bound for created_at (Unix timestamp). }
+        - { in: query, name: show,           schema: { type: integer, default: 10 }, description: Records per page. }
+        - { in: query, name: page,           schema: { type: integer, default: 1 },  description: Page number, starting at 1. }
+        - { in: query, name: export,         schema: { type: string },  description: Set to a non-empty value to export instead of paginating. }
+      responses:
+        '200':
+          description: Paginated list of customers.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelope'
+                  - type: object
+                    properties:
+                      data:
+                        allOf:
+                          - $ref: '#/components/schemas/Pagination'
+                          - type: object
+                            properties:
+                              customers:
+                                type: array
+                                items: { $ref: '#/components/schemas/Customer' }
+    post:
+      tags: [Customers]
+      summary: Create customer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CustomerInput' }
+      responses:
+        '201':
+          description: Customer created.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelope'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          customer_id: { type: integer }
+
+  /customers/{id}:
+    parameters:
+      - { in: path, name: id, required: true, schema: { type: integer }, description: Customer identifier. }
+    get:
+      tags: [Customers]
+      summary: Get customer
+      description: Retrieve a single customer with related repairs, sales, services, docs and credit history.
+      responses:
+        '200':
+          description: Customer found.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelope'
+                  - type: object
+                    properties:
+                      data: { $ref: '#/components/schemas/CustomerDetail' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    put:
+      tags: [Customers]
+      summary: Update customer
+      description: Update an existing customer. Only the fields sent in the body are modified.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CustomerInput' }
+      responses:
+        '200':
+          description: Customer updated.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelope'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          customer_id: { type: integer }
+        '404': { $ref: '#/components/responses/NotFound' }
+    delete:
+      tags: [Customers]
+      summary: Delete customer
+      responses:
+        '200':
+          description: Customer deleted.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/MessageEnvelope' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /products:
+    get:
+      tags: [Products]
+      summary: List products
+      description: Retrieve a paginated list of products. All filters are optional.
+      parameters:
+        - { in: query, name: product_name,     schema: { type: string }, description: Filter by product name (partial match). }
+        - { in: query, name: product_brand,    schema: { type: string }, description: Filter by brand (partial match). }
+        - { in: query, name: product_model,    schema: { type: string }, description: Filter by model (partial match). }
+        - { in: query, name: product_barcode,  schema: { type: string }, description: Filter by main barcode (partial match). }
+        - { in: query, name: product_ref_num,  schema: { type: string }, description: Filter by reference number (partial match). }
+        - { in: query, name: product_serial,   schema: { type: string }, description: Filter by serial number (partial match). }
+        - { in: query, name: product_category, schema: { type: string }, description: Filter by category slug. }
+        - in: query
+          name: product_stock
+          schema:
+            type: string
+            enum: [all, in_stock, low_stock, out_of_stock]
+            default: all
+          description: Stock filter.
+        - in: query
+          name: order_by
+          schema:
+            type: string
+            default: date_desc
+          description: Result ordering (e.g. date_desc, date_asc, name_asc, name_desc, stock_desc).
+        - { in: query, name: show,    schema: { type: integer, default: 10 }, description: Records per page. }
+        - { in: query, name: page,    schema: { type: integer, default: 1 },  description: Page number, starting at 1. }
+        - { in: query, name: export,  schema: { type: string }, description: Set to a non-empty value to export instead of paginating. }
+      responses:
+        '200':
+          description: Paginated list of products.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelope'
+                  - type: object
+                    properties:
+                      data:
+                        allOf:
+                          - $ref: '#/components/schemas/Pagination'
+                          - type: object
+                            properties:
+                              products:
+                                type: array
+                                items: { $ref: '#/components/schemas/Product' }
+
+  /products/{id}:
+    parameters:
+      - { in: path, name: id, required: true, schema: { type: integer }, description: Product identifier. }
+    get:
+      tags: [Products]
+      summary: Get product
+      description: Retrieve a single product with serials, defective items, units movement log and per-shop stock.
+      responses:
+        '200':
+          description: Product found.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelope'
+                  - type: object
+                    properties:
+                      data: { $ref: '#/components/schemas/ProductDetail' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    put:
+      tags: [Products]
+      summary: Update product
+      description: Update an existing product. Only the fields sent in the body are modified.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ProductInput' }
+      responses:
+        '200':
+          description: Product updated.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelope'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          product_id: { type: integer }
+        '404': { $ref: '#/components/responses/NotFound' }
+    delete:
+      tags: [Products]
+      summary: Delete product
+      responses:
+        '200':
+          description: Product deleted.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelope'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          product_id: { type: integer }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  responses:
+    Unauthorized:
+      description: Missing, invalid or expired token.
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ErrorEnvelope' }
+    NotFound:
+      description: The resource does not exist.
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ErrorEnvelope' }
+  schemas:
+    SuccessEnvelope:
+      type: object
+      properties:
+        status: { type: string, enum: [success] }
+        code:   { type: integer }
+        data:   { type: object }
+    MessageEnvelope:
+      type: object
+      properties:
+        status:  { type: string, enum: [success] }
+        code:    { type: integer }
+        message: { type: string }
+    ErrorEnvelope:
+      type: object
+      properties:
+        status:  { type: string, enum: [error] }
+        code:    { type: integer }
+        message: { type: string }
+    Pagination:
+      type: object
+      properties:
+        total:     { type: integer }
+        page:      { type: integer }
+        last_page: { type: integer }
+        rows_from: { type: integer }
+        rows_to:   { type: integer }
+    Customer:
+      type: object
+      properties:
+        id:                  { type: integer }
+        user_id:             { type: integer }
+        subaccount:          { type: string, nullable: true }
+        full_name:           { type: string }
+        phone:               { type: string }
+        email:               { type: string }
+        billing_address:     { type: string, enum: [contact, company] }
+        is_billable:         { type: integer, enum: [0, 1, 2] }
+        nif_valid:           { type: integer, enum: [0, 1] }
+        nif_type:            { type: string, enum: [NIF, NIE, CIF, OTHER] }
+        nif:                 { type: string }
+        address:             { type: string }
+        location:            { type: string }
+        province:            { type: string }
+        postal_code:         { type: string }
+        country:             { type: string }
+        company_name:        { type: string }
+        company_phone:       { type: string }
+        company_nif_valid:   { type: integer, enum: [0, 1] }
+        company_nif_type:    { type: string, enum: [NIF, NIE, CIF, OTHER] }
+        company_nif:         { type: string }
+        company_address:     { type: string }
+        company_location:    { type: string }
+        company_province:    { type: string }
+        company_postal_code: { type: string }
+        company_country:     { type: string }
+        company_email:       { type: string }
+        credit:              { type: string, description: Decimal credit balance with two decimals. }
+        birthday:            { type: string, description: Date of birth (YYYY-MM-DD). }
+        nationality:         { type: string }
+        iban:                { type: string }
+        details:             { type: string }
+        created_at:          { type: integer, description: Unix timestamp. }
+        updated_at:          { type: integer, nullable: true, description: Unix timestamp. }
+    CustomerInput:
+      type: object
+      properties:
+        full_name:           { type: string }
+        phone:               { type: string }
+        email:               { type: string }
+        nif_type:            { type: string, enum: [NIF, NIE, CIF, OTHER] }
+        nif:                 { type: string }
+        address:             { type: string }
+        location:            { type: string }
+        province:            { type: string }
+        postal_code:         { type: string }
+        country:             { type: string }
+        birthday:            { type: string }
+        nationality:         { type: string }
+        iban:                { type: string }
+        details:             { type: string }
+        is_billable:         { type: integer, enum: [0, 1, 2] }
+        billing_address:     { type: string, enum: [contact, company] }
+        company_name:        { type: string }
+        company_phone:       { type: string }
+        company_email:       { type: string }
+        company_nif_type:    { type: string, enum: [NIF, NIE, CIF, OTHER] }
+        company_nif:         { type: string }
+        company_address:     { type: string }
+        company_location:    { type: string }
+        company_province:    { type: string }
+        company_postal_code: { type: string }
+        company_country:     { type: string }
+      required: [full_name]
+    CustomerDetail:
+      allOf:
+        - $ref: '#/components/schemas/Customer'
+        - type: object
+          properties:
+            repairs:
+              type: array
+              items: { type: object }
+            sales:
+              type: array
+              items: { type: object }
+            services:
+              type: array
+              items: { type: object }
+            docs:
+              type: array
+              items: { type: object }
+            credit_history:
+              type: array
+              items:
+                type: object
+                properties:
+                  description: { type: string }
+                  created_at:  { type: integer }
+    Product:
+      type: object
+      properties:
+        product_id:           { type: integer }
+        product_name:         { type: string }
+        product_category:     { type: string }
+        product_brand:        { type: string }
+        product_model:        { type: string }
+        product_barcode:      { type: string }
+        ref_num:              { type: string }
+        barcodes:             { type: string }
+        product_units:        { type: integer, description: Current stock; may be negative when oversold. }
+        product_min_stock:    { type: integer }
+        product_bought_price: { type: string, description: Decimal with two decimals. }
+        product_sale_price:   { type: string, description: Decimal with two decimals. }
+        product_b2b_price:    { type: string, description: Decimal with two decimals. }
+        rebu:                 { type: integer, enum: [0, 1] }
+        product_details:      { type: string }
+        created_at:           { type: integer }
+        updated_at:           { type: integer }
+    ProductDetail:
+      allOf:
+        - $ref: '#/components/schemas/Product'
+        - type: object
+          properties:
+            location_id:     { type: integer }
+            provider_id:     { type: integer, nullable: true }
+            product_color:   { type: string }
+            product_storage: { type: string }
+            product_rebu:    { type: integer, enum: [0, 1] }
+            product_serials:
+              type: array
+              items: { type: object }
+            serials:       { type: string, nullable: true }
+            product_image: { type: string, nullable: true }
+            defectives:
+              type: array
+              items:
+                type: object
+                properties:
+                  id:               { type: integer }
+                  user_id:          { type: integer }
+                  product_id:       { type: integer }
+                  sale_id:          { type: integer, nullable: true }
+                  sale_product_id:  { type: integer, nullable: true }
+                  product_name:     { type: string }
+                  product_units:    { type: integer }
+                  provider_id:      { type: integer, nullable: true }
+                  provider_name:    { type: string,  nullable: true }
+                  defective_reason: { type: string,  nullable: true }
+                  product_status:   { type: string,  enum: [pending, processed] }
+                  created_at:       { type: integer }
+            units_log:
+              type: array
+              items:
+                type: object
+                properties:
+                  id:          { type: integer }
+                  user_id:     { type: integer }
+                  type:        { type: string }
+                  type_id:     { type: integer }
+                  description: { type: string }
+                  created_at:  { type: integer }
+            multishop_stock:
+              type: object
+              additionalProperties:
+                type: object
+                properties:
+                  id:        { type: integer }
+                  shop_name: { type: string }
+                  stock:     { type: integer }
+    ProductInput:
+      type: object
+      properties:
+        name:         { type: string }
+        category:     { type: string }
+        provider:     { oneOf: [ { type: integer }, { type: string } ] }
+        brand:        { type: string }
+        model:        { type: string }
+        barcode:      { type: string }
+        barcodes:     { type: string }
+        ref_num:      { type: string }
+        units:        { oneOf: [ { type: integer }, { type: string } ] }
+        old_stock:    { type: integer, description: Previous stock value, used to detect concurrent changes. }
+        min_stock:    { oneOf: [ { type: integer }, { type: string } ] }
+        bought_price: { type: string }
+        sale_price:   { type: string }
+        b2b_price:    { type: string }
+        rebu:         { oneOf: [ { type: integer, enum: [0, 1] }, { type: string, enum: ['0', '1'] } ] }
+        color:        { type: string }
+        storage:      { type: string }
+        details:      { type: string }
+        location:     { type: integer, nullable: true }

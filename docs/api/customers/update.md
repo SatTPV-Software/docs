@@ -1,3 +1,8 @@
+---
+title: Update customer
+description: PUT /customers/{id} — update an existing customer. Only the fields sent in the request body are modified.
+---
+
 # Update customer
 
 Update an existing customer. Send only the fields you want to change.

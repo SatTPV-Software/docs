@@ -1,3 +1,8 @@
+---
+title: Get product
+description: GET /products/{id} — retrieve a single product with serials, defective items, units movement log and per-shop stock.
+---
+
 # Get product
 
 Retrieve a single product by its identifier, together with its serials, defective items, units movement log and per-shop stock.

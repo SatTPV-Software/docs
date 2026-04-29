@@ -1,3 +1,8 @@
+---
+title: List customers
+description: GET /customers — retrieve a paginated list of customers with optional filters by name, phone, NIF and creation date range.
+---
+
 # List customers
 
 Retrieve a paginated list of the customers in your account. All filters are optional and can be combined.

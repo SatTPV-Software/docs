@@ -1,3 +1,8 @@
+---
+title: Authentication
+description: How to authenticate against the SatTPV API using Bearer tokens — login endpoint, token lifetime and request headers.
+---
+
 # Authentication
 
 The SatTPV API uses **Bearer tokens** for authentication. You exchange your SatTPV username and password for a token, and you then attach that token to every subsequent request.

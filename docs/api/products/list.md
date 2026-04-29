@@ -1,3 +1,8 @@
+---
+title: List products
+description: GET /products — retrieve a paginated list of products with filters by name, brand, model, barcode, reference, serial, category and stock status.
+---
+
 # List products
 
 Retrieve a paginated list of the products in your catalog. All filters are optional and can be combined.

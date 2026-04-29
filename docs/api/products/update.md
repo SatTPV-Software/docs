@@ -1,3 +1,8 @@
+---
+title: Update product
+description: PUT /products/{id} — update an existing product (name, category, pricing, stock, barcode, etc.). Only the fields sent in the request body are modified.
+---
+
 # Update product
 
 Update an existing product. Send only the fields you want to change.

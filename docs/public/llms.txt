@@ -1,0 +1,35 @@
+# SatTPV API
+
+> Official documentation for the SatTPV REST API. SatTPV is a point-of-sale and repair shop management platform; this API exposes the same resources available in your account (customers, products, repairs, sales, services, inventory…) over HTTPS, with JSON requests and responses and Bearer-token authentication.
+
+The full documentation is also available as a single Markdown file at [llms-full.txt](/docs/llms-full.txt).
+
+Base URL for every endpoint (including authentication): `https://api-v3.sattpv.net`
+
+## Getting started
+
+- [Introduction](https://https://sattpv-software.github.io/docs/introduction): overview, base URL, response envelope, HTTP status codes.
+- [Authentication](https://https://sattpv-software.github.io/docs/authentication): login endpoint, Bearer token usage, token lifetime (≥ 8 hours).
+
+## API reference
+
+### Customers
+
+- [Customers overview](https://https://sattpv-software.github.io/docs/api/customers/): module overview and customer object schema.
+- [List customers](https://https://sattpv-software.github.io/docs/api/customers/list): `GET /customers` with filters and pagination.
+- [Get customer](https://https://sattpv-software.github.io/docs/api/customers/get): `GET /customers/{id}` with related repairs, sales, services, docs and credit history.
+- [Create customer](https://https://sattpv-software.github.io/docs/api/customers/create): `POST /customers`.
+- [Update customer](https://https://sattpv-software.github.io/docs/api/customers/update): `PUT /customers/{id}`.
+- [Delete customer](https://https://sattpv-software.github.io/docs/api/customers/delete): `DELETE /customers/{id}`.
+
+### Products
+
+- [Products overview](https://https://sattpv-software.github.io/docs/api/products/): module overview and product object schema.
+- [List products](https://https://sattpv-software.github.io/docs/api/products/list): `GET /products` with filters by name, brand, model, barcode, reference, serial, category and stock.
+- [Get product](https://https://sattpv-software.github.io/docs/api/products/get): `GET /products/{id}` with serials, defectives, units log and per-shop stock.
+- [Update product](https://https://sattpv-software.github.io/docs/api/products/update): `PUT /products/{id}`.
+- [Delete product](https://https://sattpv-software.github.io/docs/api/products/delete): `DELETE /products/{id}`.
+
+## Machine-readable specs
+
+- [OpenAPI 3.1 specification](/docs/openapi.yaml)

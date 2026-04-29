@@ -1,3 +1,8 @@
+---
+title: Delete customer
+description: DELETE /customers/{id} — permanently delete a customer from your SatTPV account.
+---
+
 # Delete customer
 
 Permanently delete a customer.

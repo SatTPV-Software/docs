@@ -1,3 +1,8 @@
+---
+title: Delete product
+description: DELETE /products/{id} — permanently delete a product from your SatTPV catalog.
+---
+
 # Delete product
 
 Permanently delete a product from your catalog.

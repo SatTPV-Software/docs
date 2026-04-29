@@ -1,3 +1,8 @@
+---
+title: Create customer
+description: POST /customers — create a new customer in your SatTPV account with personal, billing and company data.
+---
+
 # Create customer
 
 Create a new customer in your account.

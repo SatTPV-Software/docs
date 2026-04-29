@@ -1,3 +1,8 @@
+---
+title: Get customer
+description: GET /customers/{id} — retrieve a single customer with related repairs, sales, services, documents and credit history.
+---
+
 # Get customer
 
 Retrieve a single customer by its identifier, together with their related repairs, sales, services, documents and credit history.
