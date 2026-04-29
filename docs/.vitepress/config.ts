@@ -48,12 +48,23 @@ export default defineConfig({
               { text: 'Delete customer', link: '/api/customers/delete' },
             ],
           },
+          {
+            text: 'Products',
+            collapsed: false,
+            link: '/api/products/',
+            items: [
+              { text: 'List products', link: '/api/products/list' },
+              { text: 'Get product', link: '/api/products/get' },
+              { text: 'Update product', link: '/api/products/update' },
+              { text: 'Delete product', link: '/api/products/delete' },
+            ],
+          },
         ],
       },
     ],
 
     socialLinks: [
-      { icon: 'github', link: 'https://github.com/sattpv' },
+      { icon: 'github', link: 'https://github.com/SatTPV-Software/docs' },
     ],
 
     search: {
@@ -66,7 +77,7 @@ export default defineConfig({
     },
 
     editLink: {
-      pattern: 'https://github.com/sattpv/api-docs/edit/main/docs/:path',
+      pattern: 'https://github.com/SatTPV-Software/docs/edit/main/docs/:path',
       text: 'Suggest changes to this page',
     },
   },
